@@ -5,6 +5,8 @@
 
 # Wazuh 
 WAZUH_HOME="/var/ossec"
+WAZUH_USER="wazuh"
+WAZUH_GROUP="wazuh"
 DEFAULT_DECODERS_HOME="/var/ossec/ruleset/decoders"
 DEFAULT_RULES_HOME="/var/ossec/ruleset/rules"
 CUSTOM_DECODERS_HOME="/var/ossec/etc/decoders"
@@ -130,6 +132,15 @@ fi
 if ! check_dir_exists $CUSTOM_DECODERS_HOME; then
   exit $EXIT_ERR
 fi
+
+# Copy over the custom rules and decoders
+cp rules/* $CUSTOM_RULES_HOME
+chmod -R 660 $CUSTOM_RULES_HOME/*.xml
+chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml
+
+cp decoders/* $CUSTOM_DECODERS_HOME
+chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml
+chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml
 
 # Exit
 exit $EXIT_SUCCESS
