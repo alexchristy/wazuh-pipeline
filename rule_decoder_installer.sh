@@ -99,6 +99,17 @@ check_dir_exists() {
   fi
 }
 
+# =====( WAZUH FUNCTIONS )===== #
+restart_wazuh() {
+  log_message $INFO_LVL "Restarting Wazuh server..."
+  if service wazuh-manager restart 2>&1 | tee -a "$SCRIPT_LOG"; then
+    log_message $INFO_LVL "Successfully restarted Wazuh server."
+  else
+    log_message $ERR_LVL "Failed to restart Wazuh server."
+    exit $EXIT_ERR
+  fi
+}
+
 # =====( MAIN )===== #
 
 # TODO: Make arg parsing function
@@ -137,10 +148,14 @@ fi
 cp rules/* $CUSTOM_RULES_HOME
 chmod -R 660 $CUSTOM_RULES_HOME/*.xml
 chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml
+log_message $INFO_LVL "Successfully copied over custom rules."
 
 cp decoders/* $CUSTOM_DECODERS_HOME
 chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml
 chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml
+log_message $INFO_LVL "Successfully copied over custom decoders."
+
+restart_wazuh
 
 # Exit
 exit $EXIT_SUCCESS
