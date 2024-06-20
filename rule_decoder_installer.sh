@@ -7,10 +7,11 @@
 WAZUH_HOME="/var/ossec"
 WAZUH_USER="wazuh"
 WAZUH_GROUP="wazuh"
-DEFAULT_DECODERS_HOME="/var/ossec/ruleset/decoders"
-DEFAULT_RULES_HOME="/var/ossec/ruleset/rules"
-CUSTOM_DECODERS_HOME="/var/ossec/etc/decoders"
-CUSTOM_RULES_HOME="/var/ossec/etc/rules"
+WAZUH_BIN="$WAZUH_HOME/bin"
+DEFAULT_DECODERS_HOME="$WAZUH_HOME/ruleset/decoders"
+DEFAULT_RULES_HOME="$WAZUH_HOME/ruleset/rules"
+CUSTOM_DECODERS_HOME="$WAZUH_HOME/etc/decoders"
+CUSTOM_RULES_HOME="$WAZUH_HOME/etc/rules"
 
 # Logging
 SCRIPT_NAME=$(basename "$0" | sed 's/\.[^.]*$//')
@@ -22,6 +23,10 @@ WARN_LVL="WARNING"
 ERR_LVL="ERROR"
 EXIT_ERR=1
 EXIT_SUCCESS=0
+
+# PIPELINE VARIABLES
+REPO_DECODERS=$(pwd)"/decoders"
+REPO_RULES=$(pwd)"/rules"
 
 # =====( ARGUMENTS )===== #
 usage() {
@@ -74,6 +79,16 @@ log_message() {
             exit 1
             ;;
     esac
+}
+
+run_command() {
+  _run_command_command=$1
+  _run_command_failure_msg=$2
+
+  if ! eval "$_run_command_command"; then
+    log_message $ERR_LVL "$_run_command_failure_msg"
+    exit $EXIT_ERR
+  fi
 }
 
 # =====( PERMISSIONS FUNCTIONS )===== #
@@ -145,17 +160,22 @@ if ! check_dir_exists $CUSTOM_DECODERS_HOME; then
 fi
 
 # Copy over the custom rules and decoders
-cp rules/* $CUSTOM_RULES_HOME
-chmod -R 660 $CUSTOM_RULES_HOME/*.xml
-chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml
+run_command "cp ""$REPO_RULES""/* $CUSTOM_RULES_HOME" "Failed to copy custom rule files from $REPO_RULES to $CUSTOM_RULES_HOME"
+run_command "chmod -R 660 $CUSTOM_RULES_HOME/*.xml" "Failed to set 660 permissions on rule files in $CUSTOM_RULES_HOME"
+run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml" "Failed to chown rule files in $CUSTOM_RULES_HOME"
 log_message $INFO_LVL "Successfully copied over custom rules."
 
-cp decoders/* $CUSTOM_DECODERS_HOME
-chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml
-chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml
+run_command "cp ""$REPO_DECODERS""/* $CUSTOM_DECODERS_HOME" "Failed to copy custom decoder files from $REPO_DECODERS to $CUSTOM_DECODERS_HOME"
+run_command "chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml" "Failed to set 660 permissions on decoder files in $CUSTOM_DECODERS_HOME"
+run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Failed to chown rule files in $CUSTOM_DECODERS_HOME"
 log_message $INFO_LVL "Successfully copied over custom decoders."
 
-restart_wazuh
+# Check for duplicated decoders
+for file in "$REPO_DECODERS"/*; do
+  echo "$file"
+done
+
+# restart_wazuh
 
 # Exit
 exit $EXIT_SUCCESS
