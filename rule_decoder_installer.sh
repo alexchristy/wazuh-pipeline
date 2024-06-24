@@ -7,9 +7,12 @@
 WAZUH_HOME="/var/ossec"
 WAZUH_USER="wazuh"
 WAZUH_GROUP="wazuh"
+WAZUH_SETTINGS="$WAZUH_HOME/etc/ossec.conf"
 WAZUH_BIN="$WAZUH_HOME/bin"
-DEFAULT_DECODERS_HOME="$WAZUH_HOME/ruleset/decoders"
-DEFAULT_RULES_HOME="$WAZUH_HOME/ruleset/rules"
+DEFAULT_DECODERS_PREFIX="ruleset/decoders"
+DEFAULT_DECODERS_HOME="$WAZUH_HOME/$DEFAULT_DECODERS_PREFIX"
+DEFAULT_RULES_PREFIX="ruleset/rules"
+DEFAULT_RULES_HOME="$WAZUH_HOME/$DEFAULT_RULES_PREFIX"
 CUSTOM_DECODERS_HOME="$WAZUH_HOME/etc/decoders"
 CUSTOM_RULES_HOME="$WAZUH_HOME/etc/rules"
 
@@ -125,6 +128,16 @@ restart_wazuh() {
   fi
 }
 
+open_ruleset_tag() {
+  echo "" >> "$WAZUH_SETTINGS"
+  echo "<!-- Disabled default decoders -->" >> "$WAZUH_SETTINGS"
+  echo "<ruleset>" >> "$WAZUH_SETTINGS"
+}
+
+close_ruleset_tag() {
+  echo "</ruleset>" >> "$WAZUH_SETTINGS"
+}
+
 # =====( MAIN )===== #
 
 # TODO: Make arg parsing function
@@ -171,11 +184,35 @@ run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Fai
 log_message $INFO_LVL "Successfully copied over custom decoders."
 
 # Check for duplicated decoders
+i=0
+
 for file in "$REPO_DECODERS"/*; do
-  echo "$file"
+  decoders=$(grep -oP '<decoder.*?>' "$file" | sort -u)
+
+  for decoder in $decoders; do
+    # Capture the list of default decoders that collide with our custom decoders
+    to_disable=$(grep -R "$decoder" "$DEFAULT_DECODERS_HOME" | awk -F: '{print $1}' | sort -u)
+
+    for def_decoder in $to_disable; do
+      # We need to create a <ruleset> tag to contain 
+      if [ "$i" -lt 1 ]; then
+        open_ruleset_tag
+      fi
+
+      exclusion_line="<decoder_exclude>$DEFAULT_DECODERS_PREFIX/$def_decoder</decoder_exclude>"
+      printf "%b\n" "\t$exclusion_line" >> "$WAZUH_SETTINGS"
+      i=$((i + 1))
+    done
+  done
 done
 
-# restart_wazuh
+# Close ruleset tag only if we actually disabled
+# any default decoders
+if [ "$i" -gt 0 ]; then
+  close_ruleset_tag
+fi
+
+restart_wazuh
 
 # Exit
 exit $EXIT_SUCCESS
