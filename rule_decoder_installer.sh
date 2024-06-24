@@ -120,7 +120,9 @@ check_dir_exists() {
 # =====( WAZUH FUNCTIONS )===== #
 restart_wazuh() {
   log_message $INFO_LVL "Restarting Wazuh server..."
-  if service wazuh-manager restart 2>&1 | tee -a "$SCRIPT_LOG"; then
+  
+  # Redirect both stdout and stderr to tee to log and display
+  if "$WAZUH_BIN/wazuh-control restart -v" 2>&1 | tee -a "$SCRIPT_LOG"; then
     log_message $INFO_LVL "Successfully restarted Wazuh server."
   else
     log_message $ERR_LVL "Failed to restart Wazuh server."
@@ -186,24 +188,43 @@ log_message $INFO_LVL "Successfully copied over custom decoders."
 # Check for duplicated decoders
 i=0
 
+# Temporary file to store the results
+tmpfile=$(mktemp) || exit 1
+
+# Ensure the temporary file is removed on script exit
+trap 'rm -f "$tmpfile"' EXIT
+
 for file in "$REPO_DECODERS"/*; do
-  decoders=$(grep -oP '<decoder.*?>' "$file" | sort -u)
+  # Extract decoders and store them in the temporary file
+  grep -oP '<decoder.*?>' "$file" | sort -u >> "$tmpfile"
+done
 
-  for decoder in $decoders; do
-    # Capture the list of default decoders that collide with our custom decoders
-    to_disable=$(grep -R "$decoder" "$DEFAULT_DECODERS_HOME" | awk -F: '{print $1}' | sort -u)
+# Read the decoders from the temporary file
+decoders=$(sort -u "$tmpfile")
 
-    for def_decoder in $to_disable; do
-      # We need to create a <ruleset> tag to contain 
-      if [ "$i" -lt 1 ]; then
-        open_ruleset_tag
-      fi
+for decoder in $decoders; do
+  # Capture the list of default decoders that collide with our custom decoders
+  tmpfile2=$(mktemp) || exit 1
+  trap 'rm -f "$tmpfile2"' EXIT
 
-      exclusion_line="<decoder_exclude>$DEFAULT_DECODERS_PREFIX/$def_decoder</decoder_exclude>"
-      printf "%b\n" "\t$exclusion_line" >> "$WAZUH_SETTINGS"
-      i=$((i + 1))
-    done
+  grep -R "$decoder" "$DEFAULT_DECODERS_HOME" | awk -F: '{print $1}' | sort -u > "$tmpfile2"
+  
+  # Read the default decoders from the second temporary file
+  def_decoders=$(sort -u "$tmpfile2")
+
+  for def_decoder in $def_decoders; do
+    # We need to create a <ruleset> tag to contain 
+    if [ "$i" -lt 1 ]; then
+      open_ruleset_tag
+    fi
+
+    partial_decoder_path=${def_decoder#"$WAZUH_HOME"}
+    exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
+    printf "%b\n" "\t$exclusion_line" >> "$WAZUH_SETTINGS"
+    i=$((i + 1))
   done
+
+  rm -f "$tmpfile2"
 done
 
 # Close ruleset tag only if we actually disabled
@@ -212,7 +233,11 @@ if [ "$i" -gt 0 ]; then
   close_ruleset_tag
 fi
 
+# Clean up the temporary file
+rm -f "$tmpfile"
+
+# Restart Wazuh
 restart_wazuh
 
-# Exit
+# Exit successfully
 exit $EXIT_SUCCESS
