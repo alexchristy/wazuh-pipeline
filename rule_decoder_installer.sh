@@ -216,7 +216,7 @@ echo "$decoders" | while IFS= read -r decoder; do
 
   for def_decoder in $def_decoders; do
     # We need to create a <ruleset> tag to contain 
-    if [ "$NUM_DISABLED_DECODERS" -lt 1 ]; then
+    if [ "$DISABLED_DECODERS" = false ]; then
       open_ruleset_tag
     fi
 
