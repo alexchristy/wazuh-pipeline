@@ -31,6 +31,9 @@ EXIT_SUCCESS=0
 REPO_DECODERS=$(pwd)"/decoders"
 REPO_RULES=$(pwd)"/rules"
 
+# GLOBALS
+DISABLED_DECODERS=false
+
 # =====( ARGUMENTS )===== #
 usage() {
   echo "Usage: $0 [args] [-h]"
@@ -131,6 +134,7 @@ restart_wazuh() {
 }
 
 open_ruleset_tag() {
+  DISABLED_DECODERS=true
   echo "" >> "$WAZUH_SETTINGS"
   echo "<!-- Disabled default decoders -->" >> "$WAZUH_SETTINGS"
   echo "<ruleset>" >> "$WAZUH_SETTINGS"
@@ -185,9 +189,6 @@ run_command "chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml" "Failed to set 660 permis
 run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Failed to chown rule files in $CUSTOM_DECODERS_HOME"
 log_message $INFO_LVL "Successfully copied over custom decoders."
 
-# Check for duplicated decoders
-i=0
-
 # Temporary file to store the results
 tmpfile=$(mktemp) || exit 1
 
@@ -202,7 +203,8 @@ done
 # Read the decoders from the temporary file
 decoders=$(sort -u "$tmpfile")
 
-for decoder in $decoders; do
+# Read the decoders line by line
+echo "$decoders" | while IFS= read -r decoder; do
   # Capture the list of default decoders that collide with our custom decoders
   tmpfile2=$(mktemp) || exit 1
   trap 'rm -f "$tmpfile2"' EXIT
@@ -214,14 +216,13 @@ for decoder in $decoders; do
 
   for def_decoder in $def_decoders; do
     # We need to create a <ruleset> tag to contain 
-    if [ "$i" -lt 1 ]; then
+    if [ "$NUM_DISABLED_DECODERS" -lt 1 ]; then
       open_ruleset_tag
     fi
 
     partial_decoder_path=${def_decoder#"$WAZUH_HOME"}
     exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
     printf "%b\n" "\t$exclusion_line" >> "$WAZUH_SETTINGS"
-    i=$((i + 1))
   done
 
   rm -f "$tmpfile2"
@@ -229,7 +230,7 @@ done
 
 # Close ruleset tag only if we actually disabled
 # any default decoders
-if [ "$i" -gt 0 ]; then
+if [ "$DISABLED_DECODERS" = true ]; then
   close_ruleset_tag
 fi
 
