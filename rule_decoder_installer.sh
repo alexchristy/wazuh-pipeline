@@ -299,7 +299,14 @@ while IFS= read -r def_decoder <&4; do
   fi
 
   partial_decoder_path=${def_decoder#"$WAZUH_HOME/"}
-  exclusion_line="    <decoder_exclude>$partial_decoder_path</decoder_exclude>"
+  exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
+
+  # Check to see if line already exists and skip it if it does
+  if grep -q "$exclusion_line" "$WAZUH_SETTINGS"; then
+    log_message $INFO_LVL "Skipping entry $exclusion_line. Already exists in $WAZUH_SETTINGS!"
+    continue
+  fi
+
   if add_ruleset_config "$exclusion_line"; then
     log_message $INFO_LVL "Successfully added decoder exclusion: $exclusion_line"
   else
