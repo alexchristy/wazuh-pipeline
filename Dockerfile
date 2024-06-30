@@ -4,8 +4,8 @@ ENV REPO=https://github.com/alexchristy/wazuh-pipeline.git
 
 WORKDIR /root
 
-RUN yum install git iproute -y && \
-    git clone $REPO wazuh_pipeline
+RUN yum install git iproute -y 
+RUN git clone $REPO wazuh_pipeline
 
 WORKDIR /root/wazuh_pipeline
 
