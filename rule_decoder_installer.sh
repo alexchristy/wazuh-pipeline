@@ -280,9 +280,9 @@ if has_xml_files "$REPO_DECODERS"; then
   run_command "chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml" "Failed to set 660 permissions on decoder files in $CUSTOM_DECODERS_HOME"
   run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Failed to chown rule files in $CUSTOM_DECODERS_HOME"
   log_message $INFO_LVL "Successfully copied over custom decoders."
+  HAVE_CUSTOM_DECODERS=true
 else
   log_message $WARN_LVL "No decoder files found in $REPO_DECODERS. Are they missing?"
-  HAVE_CUSTOM_DECODERS=true
 fi
 
 # The rest of the script logic is only for installing decoders
