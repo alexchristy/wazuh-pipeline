@@ -156,12 +156,13 @@ add_ruleset_config() {
             inside_ruleset = 1
         }
 
-        print $0
-
+        # Print the line
         if (inside_ruleset && $0 ~ /<\/ruleset>/) {
             print _add_ruleset_config_config_str
             inside_ruleset = 0
         }
+        
+        print $0
     }' "$_add_ruleset_config_config_file" > "$temp_file"
 
     # Check if awk succeeded
