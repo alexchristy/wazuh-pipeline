@@ -125,7 +125,7 @@ restart_wazuh() {
   log_message $INFO_LVL "Restarting Wazuh server..."
   
   # Redirect both stdout and stderr to tee to log and display
-  if "$WAZUH_BIN/wazuh-control restart -v" 2>&1 | tee -a "$SCRIPT_LOG"; then
+  if "$WAZUH_BIN/wazuh-control" restart -v 2>&1 | tee -a "$SCRIPT_LOG"; then
     log_message $INFO_LVL "Successfully restarted Wazuh server."
   else
     log_message $ERR_LVL "Failed to restart Wazuh server."
@@ -137,11 +137,13 @@ open_ruleset_tag() {
   DISABLED_DECODERS=true
   echo "" >> "$WAZUH_SETTINGS"
   echo "<!-- Disabled default decoders -->" >> "$WAZUH_SETTINGS"
-  echo "<ruleset>" >> "$WAZUH_SETTINGS"
+  echo "<ossec_config>" >> "$WAZUH_SETTINGS"
+  printf "%b\n" "  <ruleset>" >> "$WAZUH_SETTINGS" # 2 spaces = tab 
 }
 
 close_ruleset_tag() {
-  echo "</ruleset>" >> "$WAZUH_SETTINGS"
+  printf "%b\n" "  <ruleset>" >> "$WAZUH_SETTINGS" # 2 spaces = tab
+  echo "<ossec_config>" >> "$WAZUH_SETTINGS"
 }
 
 # =====( MAIN )===== #
@@ -191,51 +193,70 @@ log_message $INFO_LVL "Successfully copied over custom decoders."
 
 # Temporary file to store the results
 tmpfile=$(mktemp) || exit 1
+dedup_tmpfile=$(mktemp) || exit 1
+disable_tmpfile=$(mktemp) || exit 1
 
-# Ensure the temporary file is removed on script exit
-trap 'rm -f "$tmpfile"' EXIT
+# Ensure the temporary files are removed on script exit
+trap 'rm -f "$tmpfile" "$dedup_tmpfile" "$disable_tmpfile"' EXIT
 
+# Collect decoders from the repository files
 for file in "$REPO_DECODERS"/*; do
-  # Extract decoders and store them in the temporary file
-  grep -oP '<decoder.*?>' "$file" | sort -u >> "$tmpfile"
+  grep -oP '<decoder.*?>' "$file" >> "$tmpfile"
 done
 
-# Read the decoders from the temporary file
-decoders=$(sort -u "$tmpfile")
+# Deduplicate the decoders and store them in a second temporary file
+sort -u "$tmpfile" > "$dedup_tmpfile"
 
-# Read the decoders line by line
-echo "$decoders" | while IFS= read -r decoder; do
+# Create a file descriptor for reading the deduplicated decoders
+exec 3< "$dedup_tmpfile"
+
+# Flag to track if any decoder is disabled
+DISABLED_DECODERS=false
+
+# Collect the default decoders that need to be disabled
+while IFS= read -r decoder <&3; do
+  echo "Processing decoder: $decoder" # Debug statement
   # Capture the list of default decoders that collide with our custom decoders
   tmpfile2=$(mktemp) || exit 1
   trap 'rm -f "$tmpfile2"' EXIT
 
-  grep -R "$decoder" "$DEFAULT_DECODERS_HOME" | awk -F: '{print $1}' | sort -u > "$tmpfile2"
-  
-  # Read the default decoders from the second temporary file
-  def_decoders=$(sort -u "$tmpfile2")
-
-  for def_decoder in $def_decoders; do
-    # We need to create a <ruleset> tag to contain 
-    if [ "$DISABLED_DECODERS" = false ]; then
-      open_ruleset_tag
-    fi
-
-    partial_decoder_path=${def_decoder#"$WAZUH_HOME"}
-    exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
-    printf "%b\n" "\t$exclusion_line" >> "$WAZUH_SETTINGS"
-  done
+  grep -R "$decoder" "$DEFAULT_DECODERS_HOME" | awk -F: '{print $1}' | sort -u >> "$disable_tmpfile"
 
   rm -f "$tmpfile2"
 done
 
-# Close ruleset tag only if we actually disabled
-# any default decoders
+# Close the file descriptor
+exec 3<&-
+
+# Deduplicate the list of default decoders to disable
+sort -u "$disable_tmpfile" > "$dedup_tmpfile"
+
+# Create a file descriptor for reading the finalized list of default decoders to disable
+exec 4< "$dedup_tmpfile"
+
+# Process the deduplicated list of default decoders
+while IFS= read -r def_decoder <&4; do
+  echo "Disabling default decoder: $def_decoder" # Debug statement
+  if [ "$DISABLED_DECODERS" = false ]; then
+    open_ruleset_tag
+    DISABLED_DECODERS=true
+  fi
+
+  partial_decoder_path=${def_decoder#"$WAZUH_HOME/"}
+  exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
+  printf "%b\n" "    $exclusion_line" >> "$WAZUH_SETTINGS" # 4 spaces (2 spaces = tab)
+done
+
+# Close the file descriptor
+exec 4<&-
+
+# Close ruleset tag only if we actually disabled any default decoders
 if [ "$DISABLED_DECODERS" = true ]; then
   close_ruleset_tag
 fi
 
-# Clean up the temporary file
-rm -f "$tmpfile"
+# Clean up the temporary files
+rm -f "$tmpfile" "$dedup_tmpfile" "$disable_tmpfile"
 
 # Restart Wazuh
 restart_wazuh
