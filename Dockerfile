@@ -1,6 +1,11 @@
 FROM wazuh/wazuh-manager:4.8.0
 
+#=========================================#
+#=== CHANGE THIS TO YOUR PIPELINE REPO ===#
+#=========================================#
 ENV PIPELINE_REPO=https://github.com/alexchristy/wazuh-pipeline.git
+#=========================================#
+
 ENV WAZUH_TEST_REPO=https://github.com/alexchristy/WazuhTest.git
 
 WORKDIR /root
