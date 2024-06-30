@@ -319,7 +319,8 @@ run_command "chmod 660 $WAZUH_SETTINGS" "Failed to add RW permissions to $WAZUH_
 rm -f "$tmpfile" "$dedup_tmpfile" "$disable_tmpfile"
 
 # Restart Wazuh
-restart_wazuh
-
-# Exit successfully
-exit $EXIT_SUCCESS
+if restart_wazuh; then
+  exit $EXIT_SUCCESS
+else
+  exit $EXIT_ERR
+fi
