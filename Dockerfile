@@ -9,7 +9,6 @@ RUN yum install git iproute -y && \
 
 WORKDIR /root/wazuh_pipeline
 
-# Delay until Wazuh manager is fully started
-RUN sh start_delay.sh
+RUN chmod +x ./*.sh
 
-RUN sh rule_decoder_installer.sh
+ENTRYPOINT ["/bin/sh", "/root/wazuh_pipeline/main.sh"]
