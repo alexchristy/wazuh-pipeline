@@ -10,3 +10,6 @@ sh ./start_delay.sh
 # Install custom rules and decoders
 echo "Installing custom rules and decoders..."
 sh ./rule_decoder_installer.sh
+
+# Keep container running
+tail -f /dev/null
