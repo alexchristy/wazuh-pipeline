@@ -311,6 +311,10 @@ done
 # Close the file descriptor
 exec 4<&-
 
+# Set the correct permissions on the new config file
+run_command "chgrp $WAZUH_GROUP $WAZUH_SETTINGS" "Failed to change $WAZUH_SETTINGS file to the $WAZUH_GROUP."
+run_command "chmod 660 $WAZUH_SETTINGS" "Failed to add RW permissions to $WAZUH_SETTINGS for the $WAZUH_GROUP group."
+
 # Clean up the temporary files
 rm -f "$tmpfile" "$dedup_tmpfile" "$disable_tmpfile"
 
