@@ -1,11 +1,20 @@
 FROM wazuh/wazuh-manager:4.8.0
 
-ENV REPO=https://github.com/alexchristy/wazuh-pipeline.git
+ENV PIPELINE_REPO=https://github.com/alexchristy/wazuh-pipeline.git
+ENV WAZUH_TEST_REPO=https://github.com/alexchristy/WazuhTest.git
 
 WORKDIR /root
 
-RUN yum install git iproute -y 
-RUN git clone $REPO wazuh_pipeline
+# Clone repos
+RUN yum install git iproute golang -y 
+RUN git clone $PIPELINE_REPO wazuh_pipeline
+RUN git clone $WAZUH_TEST_REPO wazuh_test
+
+# Install WazuhTest framework
+WORKDIR /root/wazuh_test
+RUN go build .
+RUN chmod 751 WazuhTest
+RUN cp ./WazuhTest /usr/bin
 
 WORKDIR /root/wazuh_pipeline
 
