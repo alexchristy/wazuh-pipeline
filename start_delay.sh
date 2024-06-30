@@ -1,7 +1,7 @@
 #!/bin/sh
 
-MAX_ATTEMPTS=25
-DELAY=3
+MAX_ATTEMPTS=120
+DELAY=1
 
 # Wazuh ports
 PORTS="55000 1514 1515"
