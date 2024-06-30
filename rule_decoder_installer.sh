@@ -133,17 +133,73 @@ restart_wazuh() {
   fi
 }
 
-open_ruleset_tag() {
-  DISABLED_DECODERS=true
-  echo "" >> "$WAZUH_SETTINGS"
-  echo "<!-- Disabled default decoders -->" >> "$WAZUH_SETTINGS"
-  echo "<ossec_config>" >> "$WAZUH_SETTINGS"
-  printf "%b\n" "  <ruleset>" >> "$WAZUH_SETTINGS" # 2 spaces = tab 
-}
+add_ruleset_config() {
+    _add_ruleset_config_config_file="$WAZUH_SETTINGS"
+    _add_ruleset_config_config_str="$1"
 
-close_ruleset_tag() {
-  printf "%b\n" "  <ruleset>" >> "$WAZUH_SETTINGS" # 2 spaces = tab
-  echo "<ossec_config>" >> "$WAZUH_SETTINGS"
+    if [ ! -f "$_add_ruleset_config_config_file" ]; then
+        log_message $ERR_LVL "File '$_add_ruleset_config_config_file' not found."
+        return 1
+    fi
+
+    # Create a temporary file
+    temp_file=$(mktemp)
+
+    awk -v _add_ruleset_config_config_str="$_add_ruleset_config_config_str" '
+    BEGIN {
+        # Flag to indicate if inside ruleset tag
+        inside_ruleset = 0
+    }
+
+    {
+        if ($0 ~ /<ruleset>/) {
+            inside_ruleset = 1
+        }
+
+        print $0
+
+        if (inside_ruleset && $0 ~ /<\/ruleset>/) {
+            print _add_ruleset_config_config_str
+            inside_ruleset = 0
+        }
+    }' "$_add_ruleset_config_config_file" > "$temp_file"
+
+    # Check if awk succeeded
+    # shellcheck disable=SC2181 # Disabled because the awk command lengthy
+    if [ $? -ne 0 ]; then
+        log_message $ERR_LVL "Failed to process file with awk."
+        rm "$temp_file"
+        return 1
+    fi
+
+    # Backup the original file
+    # Check if backup succeeded
+    if cp "$_add_ruleset_config_config_file" "$_add_ruleset_config_config_file.bak"; then
+      log_message $INFO_LVL "Created backup of '$_add_ruleset_config_config_file'."
+    else
+        echo "Error: Failed to create backup of '$_add_ruleset_config_config_file'."
+        rm "$temp_file"
+        return 1
+    fi
+
+    # Replace the original file with the modified one
+    # Check if move succeeded
+    if mv "$temp_file" "$_add_ruleset_config_config_file"; then
+      log_message $INFO_LVL "Successfully updated '$_add_ruleset_config_config_file'."
+    else
+        echo "Error: Failed to update '$_add_ruleset_config_config_file'."
+        mv "$_add_ruleset_config_config_file.bak" "$_add_ruleset_config_config_file"
+        rm "$temp_file"
+        return 1
+    fi
+ 
+
+    echo "New strings inserted successfully."
+
+    # Clean up temporary file if it still exists
+    [ -f "$temp_file" ] && rm "$temp_file"
+
+    return 0
 }
 
 # =====( MAIN )===== #
@@ -238,22 +294,21 @@ exec 4< "$dedup_tmpfile"
 while IFS= read -r def_decoder <&4; do
   echo "Disabling default decoder: $def_decoder" # Debug statement
   if [ "$DISABLED_DECODERS" = false ]; then
-    open_ruleset_tag
     DISABLED_DECODERS=true
   fi
 
   partial_decoder_path=${def_decoder#"$WAZUH_HOME/"}
-  exclusion_line="<decoder_exclude>$partial_decoder_path</decoder_exclude>"
-  printf "%b\n" "    $exclusion_line" >> "$WAZUH_SETTINGS" # 4 spaces (2 spaces = tab)
+  exclusion_line="    <decoder_exclude>$partial_decoder_path</decoder_exclude>"
+  if add_ruleset_config "$exclusion_line"; then
+    log_message $INFO_LVL "Successfully added decoder exclusion: $exclusion_line"
+  else
+    log_message $ERR_LVL "Failed to add decoder exclusion: $exclusion_line"
+    exit $EXIT_ERR
+  fi
 done
 
 # Close the file descriptor
 exec 4<&-
-
-# Close ruleset tag only if we actually disabled any default decoders
-if [ "$DISABLED_DECODERS" = true ]; then
-  close_ruleset_tag
-fi
 
 # Clean up the temporary files
 rm -f "$tmpfile" "$dedup_tmpfile" "$disable_tmpfile"
