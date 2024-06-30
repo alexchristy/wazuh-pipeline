@@ -307,6 +307,9 @@ while IFS= read -r def_decoder <&4; do
     continue
   fi
 
+  # Add proper spacing
+  exclusion_line="    $exclusion_line"
+
   if add_ruleset_config "$exclusion_line"; then
     log_message $INFO_LVL "Successfully added decoder exclusion: $exclusion_line"
   else
