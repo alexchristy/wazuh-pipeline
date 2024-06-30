@@ -33,6 +33,8 @@ REPO_RULES=$(pwd)"/rules"
 
 # GLOBALS
 DISABLED_DECODERS=false
+HAVE_CUSTOM_RULES=false
+HAVE_CUSTOM_DECODERS=false
 
 # =====( ARGUMENTS )===== #
 usage() {
@@ -118,6 +120,31 @@ check_dir_exists() {
     log_message $ERR_LVL "Directory '$_check_dir_exists_dir_path' does not exist."
     return 1
   fi
+}
+
+has_xml_files() {
+    directory="$1"
+
+    # Check if the path exists
+    if [ ! -e "$directory" ]; then
+        log_message $ERR_LVL "The path '$directory' does not exist."
+        return 1
+    fi
+
+    # Check if the path is a directory
+    if [ ! -d "$directory" ]; then
+        log_message $ERR_LVL "The path '$directory' is not a directory."
+        return 1
+    fi
+
+    # Check for .xml files in the directory
+    if ls "$directory"/*.xml >/dev/null 2>&1; then
+        log_message $INFO_LVL "XML files found in the directory '$directory'."
+        return 0
+    else
+        log_message $INFO_LVL "No XML files found in the directory '$directory'."
+        return 1
+    fi
 }
 
 # =====( WAZUH FUNCTIONS )===== #
@@ -238,15 +265,45 @@ if ! check_dir_exists $CUSTOM_DECODERS_HOME; then
 fi
 
 # Copy over the custom rules and decoders
-run_command "cp ""$REPO_RULES""/* $CUSTOM_RULES_HOME" "Failed to copy custom rule files from $REPO_RULES to $CUSTOM_RULES_HOME"
-run_command "chmod -R 660 $CUSTOM_RULES_HOME/*.xml" "Failed to set 660 permissions on rule files in $CUSTOM_RULES_HOME"
-run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml" "Failed to chown rule files in $CUSTOM_RULES_HOME"
-log_message $INFO_LVL "Successfully copied over custom rules."
+if has_xml_files "$REPO_RULES"; then
+  run_command "cp ""$REPO_RULES""/* $CUSTOM_RULES_HOME" "Failed to copy custom rule files from $REPO_RULES to $CUSTOM_RULES_HOME"
+  run_command "chmod -R 660 $CUSTOM_RULES_HOME/*.xml" "Failed to set 660 permissions on rule files in $CUSTOM_RULES_HOME"
+  run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_RULES_HOME/*.xml" "Failed to chown rule files in $CUSTOM_RULES_HOME"
+  log_message $INFO_LVL "Successfully copied over custom rules."
+  HAVE_CUSTOM_RULES=true
+else
+  log_message $WARN_LVL "No rule files found in $REPO_RULES. Are they missing?"
+fi
 
-run_command "cp ""$REPO_DECODERS""/* $CUSTOM_DECODERS_HOME" "Failed to copy custom decoder files from $REPO_DECODERS to $CUSTOM_DECODERS_HOME"
-run_command "chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml" "Failed to set 660 permissions on decoder files in $CUSTOM_DECODERS_HOME"
-run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Failed to chown rule files in $CUSTOM_DECODERS_HOME"
-log_message $INFO_LVL "Successfully copied over custom decoders."
+if has_xml_files "$REPO_DECODERS"; then
+  run_command "cp ""$REPO_DECODERS""/* $CUSTOM_DECODERS_HOME" "Failed to copy custom decoder files from $REPO_DECODERS to $CUSTOM_DECODERS_HOME"
+  run_command "chmod -R 660 $CUSTOM_DECODERS_HOME/*.xml" "Failed to set 660 permissions on decoder files in $CUSTOM_DECODERS_HOME"
+  run_command "chown $WAZUH_USER:$WAZUH_GROUP -R $CUSTOM_DECODERS_HOME/*.xml" "Failed to chown rule files in $CUSTOM_DECODERS_HOME"
+  log_message $INFO_LVL "Successfully copied over custom decoders."
+else
+  log_message $WARN_LVL "No decoder files found in $REPO_DECODERS. Are they missing?"
+  HAVE_CUSTOM_DECODERS=true
+fi
+
+# The rest of the script logic is only for installing decoders
+# so if there are no custom decoders we should just restart the
+# wazuh manager for the rules to become active
+if [ "$HAVE_CUSTOM_DECODERS" = false ]; then
+
+  # NO DECODERS; YES RULES
+  if [ "$HAVE_CUSTOM_RULES" = true ]; then
+    if restart_wazuh; then
+      exit $EXIT_SUCCESS
+    else
+      exit $EXIT_ERR
+    fi
+
+  # NO DECODERS; NO RULES
+  else
+    exit $EXIT_SUCCESS
+  fi
+
+fi
 
 # Temporary file to store the results
 tmpfile=$(mktemp) || exit 1
