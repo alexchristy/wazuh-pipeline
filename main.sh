@@ -3,6 +3,10 @@
 echo "Starting wazuh manager..."
 /init &
 
+# Load in constants
+echo "Setting up enviroment..."
+sh ./constants.sh
+
 # Delay until the server is fully started
 echo "Waiting for wazuh manager to start up..."
 sh ./start_delay.sh

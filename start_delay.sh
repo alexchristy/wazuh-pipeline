@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# ====( IMPORTS )==== #
+# shellcheck disable=SC1091
+. "$PIPELINE_REPO_PATH/utils.sh"
+
+# =====( MAIN )===== #
+
 MAX_ATTEMPTS=120
 DELAY=1
 
@@ -19,8 +25,8 @@ attempt=0
 
 while [ $attempt -lt $MAX_ATTEMPTS ]; do
     if check_ports; then
-        echo "Success: All ports are listening."
-        exit 0
+        log_message "$INFO_LVL" "Success: All ports are listening."
+        exit "$EXIT_SUCCESS"
     fi
 
     attempt=$((attempt + 1))
@@ -28,5 +34,5 @@ while [ $attempt -lt $MAX_ATTEMPTS ]; do
     sleep $DELAY
 done
 
-echo "Failure: Not all ports are listening after $MAX_ATTEMPTS attempts."
-exit 1
+log_message "$ERR_LVL" "Failure: Not all ports are listening after $MAX_ATTEMPTS attempts."
+exit "$EXIT_ERR"
