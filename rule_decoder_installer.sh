@@ -6,9 +6,6 @@
 
 # =====( MAIN )===== #
 
-# Logging
-setup_logging
-
 # Ensure that we have root permissions
 # so that we can modify the /var/ossec dir
 if ! check_root; then

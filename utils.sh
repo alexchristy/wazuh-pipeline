@@ -187,3 +187,39 @@ add_ruleset_config() {
 
     return 0
 }
+
+# Function to update the <threads> tag value to "auto"
+update_threads_tag() {
+    _update_threads_tag_file_path="$1"
+
+    # Check if the file exists
+    if [ ! -f "$_update_threads_tag_file_path" ]; then
+        log_message "$ERR_LVL" "Error: The file '$_update_threads_tag_file_path' does not exist."
+        return 1
+    fi
+
+    # Use sed to update the <threads> tag value to "auto"
+    sed -i 's|<threads>.*</threads>|<threads>auto</threads>|' "$_update_threads_tag_file_path"
+
+    # Check if the sed command was successful
+    # shellcheck disable=SC2181 # Sed command too long to put directly into if statement
+    if [ $? -ne 0 ]; then
+        log_message "$ERR_LVL" "Error: Failed to update the <threads> tag in '$_update_threads_tag_file_path'."
+        return 1
+    fi
+
+    log_message "$INFO_LVL" "Successfully updated the <threads> tag in '$_update_threads_tag_file_path'."
+    return 0
+}
+
+# ====( MISC FUNCTIONS )==== #
+count_logical_cpus() {
+    if [ -f /proc/cpuinfo ]; then
+        _count_logical_cpus_num_cpus=$(grep -c ^processor /proc/cpuinfo)
+        log_message "$INFO_LVL" "Successfully determined the number of CPUs."
+        echo "$_count_logical_cpus_num_cpus"
+    else
+        log_message "$INFO_LVL" "Unable to determine the number of CPUs. /proc/cpuinfo not found."
+        return 1
+    fi
+}
