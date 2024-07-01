@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# ====( IMPORTS )==== #
+# shellcheck disable=SC1091
+. "$PIPELINE_REPO_PATH/constants.sh"
 
 # =====( LOGGING FUNCTIONS )===== #
 setup_logging() {

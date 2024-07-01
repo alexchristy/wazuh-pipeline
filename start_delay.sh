@@ -3,6 +3,7 @@
 # ====( IMPORTS )==== #
 # shellcheck disable=SC1091
 . "$PIPELINE_REPO_PATH/utils.sh"
+. "$PIPELINE_REPO_PATH/constants.sh"
 
 # =====( MAIN )===== #
 
