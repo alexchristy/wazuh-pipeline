@@ -7,22 +7,23 @@
 # =====( MAIN )===== #
 setup_logging
 
-echo "Starting wazuh manager..."
+log_message "$INFO_LVL" "Starting wazuh manager..."
 /init &
 
 # Load in constants
-echo "Setting up enviroment..."
+log_message "$INFO_LVL" "Setting up enviroment..."
 sh ./constants.sh
 
 # Delay until the server is fully started
-echo "Waiting for wazuh manager to start up..."
+log_message "$INFO_LVL" "Waiting for wazuh manager to start up..."
 sh ./start_delay.sh
 
 # Install custom rules and decoders
-echo "Installing custom rules and decoders..."
+log_message "$INFO_LVL" "Installing custom rules and decoders..."
 sh ./rule_decoder_installer.sh
 
 # Run tests
+log_message "$INFO_LVL" "Running tests..."
 sh ./run_tests.sh
 
 # Keep container running
