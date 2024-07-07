@@ -219,7 +219,6 @@ update_threads_tag() {
 count_logical_cpus() {
     if [ -f /proc/cpuinfo ]; then
         _count_logical_cpus_num_cpus=$(grep -c ^processor /proc/cpuinfo)
-        log_message "$INFO_LVL" "Successfully determined the number of CPUs."
         echo "$_count_logical_cpus_num_cpus"
     else
         log_message "$INFO_LVL" "Unable to determine the number of CPUs. /proc/cpuinfo not found."
