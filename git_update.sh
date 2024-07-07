@@ -22,10 +22,7 @@ fi
 
 # Get the remote repository URL
 REMOTE_REPO_URL=$(git config --get remote.origin.url)
-pwd
-cat ".git/config"
-echo "$REMOTE_REPO_URL"
-if [ -z "$REMOTE_URL" ]; then
+if [ -z "$REMOTE_REPO_URL" ]; then
     log_message "$ERR_LVL" "Failed to get the remote repository URL."
     exit "$EXIT_ERR"
 fi
