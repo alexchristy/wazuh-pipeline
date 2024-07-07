@@ -16,23 +16,33 @@ log_message "$INFO_LVL" "Starting wazuh manager..."
 
 # Load in constants
 log_message "$INFO_LVL" "Setting up enviroment..."
-sh ./constants.sh
+if ! sh ./constants.sh; then
+    exit "$EXIT_ERR"
+fi
 
 # Update the pipeline repo
 log_message "$INFO_LVL" "Checking for updates to pipeline repo..."
-sh ./git_update.sh
+if ! sh ./git_update.sh; then
+    exit "$EXIT_ERR"
+fi
 
 # Delay until the server is fully started
 log_message "$INFO_LVL" "Waiting for wazuh manager to start up..."
-sh ./start_delay.sh
+if ! sh ./start_delay.sh; then
+    exit "$EXIT_ERR"
+fi
 
 # Install custom rules and decoders
 log_message "$INFO_LVL" "Installing custom rules and decoders..."
-sh ./rule_decoder_installer.sh
+if ! sh ./rule_decoder_installer.sh; then
+    exit "$EXIT_ERR"
+fi
 
 # Run tests
 log_message "$INFO_LVL" "Running tests..."
-sh ./run_tests.sh
+if ! sh ./run_tests.sh; then
+    exit "$EXIT_ERR"
+fi
 
 # Keep container running
 tail -f /dev/null
