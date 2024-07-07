@@ -22,8 +22,7 @@
                 "timestamp": "Mar  5 08:44:55"
             },
             "Decoder": {
-                "name": "kernel",
-                "incorrectKey": "This should be flagged"
+                "name": "kernel"
             },
             "LogFilePath": "5104.txt"
         }
