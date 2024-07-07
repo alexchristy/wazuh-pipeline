@@ -23,6 +23,8 @@ fi
 
 # Host set to localhost since we are running tests from
 # within the manager container itself
+#
+# Username and password are the default for the wazuh/wazuh-manager container on docker hub
 passed=$(WazuhTest -d "$PIPELINE_REPO_PATH/tests" -t "$num_cpus" -u "wazuh" -p "wazuh" -v 127.0.0.1)
 
 exit "$passed"

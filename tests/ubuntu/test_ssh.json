@@ -1,0 +1,24 @@
+{
+    "tests": [
+        {
+            "TestDescription": "SSH login to a non-existent user",
+            "RuleID": "5710",
+            "RuleLevel": "5",
+            "Format": "syslog",
+            "RuleDescription": "sshd: Attempt to login using a non-existent user",
+            "LogFilePath": "5710.txt",
+            "Predecoder": {},
+            "Decoder": {}
+        },
+        {
+            "TestDescription": "SSH login to a non-existent user from a local network",
+            "RuleID": "5710",
+            "RuleLevel": "5",
+            "Format": "syslog",
+            "RuleDescription": "sshd: Attempt to login using a non-existent user",
+            "LogFilePath": "5710-local-net.txt",
+            "Predecoder": {},
+            "Decoder": {}
+        }
+    ]
+}

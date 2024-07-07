@@ -1,0 +1,31 @@
+{
+    "Tests": [
+        {
+            "Version": "0.1",
+            "TestDescription": "Server start rule test.",
+            "RuleID": "502",
+            "RuleLevel": "3",
+            "Format": "syslog",
+            "RuleDescription": "Wazuh server started.",
+            "Predecoder":{},
+            "Decoder": {},
+            "LogFilePath": "502.txt" 
+        },
+        {
+            "TestDescription": "Sniffing mode rule test.",
+            "RuleID": "5104",
+            "RuleLevel": "8",
+            "Format": "syslog",
+            "RuleDescription": "Interface entered in promiscuous(sniffing) mode.",
+            "Predecoder": {
+                "hostname": "ip-10-0-0-12",
+                "timestamp": "Mar  5 08:44:55"
+            },
+            "Decoder": {
+                "name": "kernel",
+                "incorrectKey": "This should be flagged"
+            },
+            "LogFilePath": "5104.txt"
+        }
+    ]
+}

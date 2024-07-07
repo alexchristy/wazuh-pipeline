@@ -1,0 +1,14 @@
+{
+    "tests": [
+        {
+            "TestDescription": "Wazuh agent event queue is full",
+            "RuleID": "203",
+            "RuleLevel": "9",
+            "format": "syslog",
+            "RuleDescription": "Agent event queue is full. Events may be lost.",
+            "LogFilePath": "203.txt",
+            "Predecoder": {},
+            "Decoder": {} 
+        }
+    ]
+}

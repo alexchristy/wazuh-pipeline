@@ -1,0 +1,1 @@
+Mar  5 08:44:55 ip-10-0-0-12 kernel: device eth0 entered promiscuous mode
