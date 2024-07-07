@@ -44,5 +44,4 @@ if ! sh ./run_tests.sh; then
     exit "$EXIT_ERR"
 fi
 
-# Keep container running
-tail -f /dev/null
+exit "$EXIT_SUCCESS"
