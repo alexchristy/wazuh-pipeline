@@ -15,6 +15,10 @@ log_message "$INFO_LVL" "Starting wazuh manager..."
 log_message "$INFO_LVL" "Setting up enviroment..."
 sh ./constants.sh
 
+# Update the pipeline repo
+log_message "$INFO_LVL" "Checking for updates to pipeline repo..."
+sh ./git_update.sh
+
 # Delay until the server is fully started
 log_message "$INFO_LVL" "Waiting for wazuh manager to start up..."
 sh ./start_delay.sh
