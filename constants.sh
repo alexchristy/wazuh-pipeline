@@ -19,6 +19,7 @@ export SCRIPT_NAME="wazuh_pipeline"
 export LOG_PATH="./$SCRIPT_NAME" # Default log path
 export SCRIPT_LOG=$LOG_PATH"_script.log"
 export SHELL_LOG=$LOG_PATH"_shell.log"
+export WAZUH_TEST_LOG=$LOG_PATH"_wazuh_test.log"
 export INFO_LVL="INFO"
 export WARN_LVL="WARNING"
 export ERR_LVL="ERROR"

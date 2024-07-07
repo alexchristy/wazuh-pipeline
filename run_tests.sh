@@ -25,6 +25,9 @@ fi
 # within the manager container itself
 #
 # Username and password are the default for the wazuh/wazuh-manager container on docker hub
-passed=$(WazuhTest -d "$PIPELINE_REPO_PATH/tests" -t "$num_cpus" -u "wazuh" -p "wazuh" -v 127.0.0.1)
+WazuhTest -d "$PIPELINE_REPO_PATH/tests" -t "$num_cpus" -u "wazuh" -p "wazuh" -v 127.0.0.1 > "$WAZUH_TEST_LOG" 2>&1
+passed=$?
+
+cat "$WAZUH_TEST_LOG"
 
 exit "$passed"
