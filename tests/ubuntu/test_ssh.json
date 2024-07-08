@@ -18,7 +18,11 @@
             "RuleDescription": "sshd: Attempt to login using a non-existent user",
             "LogFilePath": "5710-local-net.txt",
             "Predecoder": {},
-            "Decoder": {}
+            "Decoder": {
+                "srcip": "10.0.0.4",
+                "srcport": "59528",
+                "srcuser": "non-existent"
+            }
         }
     ]
 }
