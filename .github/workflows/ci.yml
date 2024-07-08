@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  run-container:
+  run-wazuh-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +22,9 @@ jobs:
     - name: Pull Docker image
       run: docker pull ${{ secrets.DOCKER_IMAGE }}
 
-    - name: Run container
+    - name: Run container with branch info
       run: |
-        docker run ${{ secrets.DOCKER_IMAGE }} || exit 1
+        docker run -e BRANCH_NAME=${GITHUB_REF_NAME} ${{ secrets.DOCKER_IMAGE }} || exit 1
 
     - name: Verify container exit status
       run: |

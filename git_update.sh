@@ -6,6 +6,14 @@
 
 # =====( MAIN )===== #
 
+# Check that we recieved the branch name
+if [ -n "$BRANCH_NAME" ]; then
+    log_message "$INFO_LVL" "Updating branch: $BRANCH_NAME"
+else
+    log_message "$ERR_LVL" "No branch set. Exiting..."
+    exit "$EXIT_ERR"
+fi
+
 # Check that the PIPELINE_REPO_PATH exists
 if [ ! -d "$PIPELINE_REPO_PATH" ]; then
     log_message "$ERR_LVL" "The pipeline repo path does not exist! Path: $PIPELINE_REPO_PATH"
@@ -27,20 +35,26 @@ if [ -z "$REMOTE_REPO_URL" ]; then
     exit "$EXIT_ERR"
 fi
 
-# Git pull
-OUTPUT=$(git pull 2>&1)
+# Fetch the latest changes
+run_command "git fetch" "Failed to fetch from remote: $REMOTE_REPO_URL"
+
+# Checkout the branch
+run_command "git checkout $BRANCH_NAME" "Failed to checkout branch: $BRANCH_NAME"
+
+# Pull the latest changes for the branch
+OUTPUT=$(git pull origin "$BRANCH_NAME" 2>&1)
 STATUS=$?
 
 # Check if git pull failed
 if [ $STATUS -ne 0 ]; then
-    log_message "$ERR_LVL" "Git pull failed for remote: $REMOTE_REPO_URL"
+    log_message "$ERR_LVL" "Git pull failed for branch: $BRANCH_NAME, remote: $REMOTE_REPO_URL"
     exit "$EXIT_ERR"
 fi
 
 if echo "$OUTPUT" | grep -q "Already up to date."; then
-    log_message "$INFO_LVL" "No updates were made."
+    log_message "$INFO_LVL" "No updates were made to branch: $BRANCH_NAME."
 else
-    log_message "$INFO_LVL" "Pipeline repo was updated."
+    log_message "$INFO_LVL" "Branch $BRANCH_NAME was updated."
 fi
 
 exit "$EXIT_SUCCESS"
