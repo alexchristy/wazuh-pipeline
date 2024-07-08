@@ -69,7 +69,7 @@ passed=$(sh ./run_tests.sh)
 
 if [ "$INTERACTIVE_MODE" = true ]; then
     log_message "$INFO_LVL" "Running in interactive mode"
-    /bin/sh
+    tail -f /dev/null
 else
     if ! $passed; then
         exit "$EXIT_ERR"
