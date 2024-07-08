@@ -22,7 +22,8 @@
                 "timestamp": "Mar  5 08:44:55"
             },
             "Decoder": {
-                "name": "kernel"
+                "name": "kernel",
+                "fake-key": "This should fail"
             },
             "LogFilePath": "5104.txt"
         }
