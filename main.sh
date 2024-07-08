@@ -1,5 +1,27 @@
 #!/bin/sh
 
+# ====( FUNCTIONS )==== #
+usage() {
+    echo "Usage: $0 [-i]"
+    echo "  -i    Run the container in interactive mode."
+    exit 1
+}
+
+parse_args() {
+    INTERACTIVE_MODE=false
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -i)
+                INTERACTIVE_MODE=true
+                shift
+                ;;
+            *)
+                usage
+                ;;
+        esac
+    done
+}
+
 # ====( CONSTANTS )==== #
 PIPELINE_REPO_PATH="/root/wazuh_pipeline"
 
@@ -10,6 +32,9 @@ PIPELINE_REPO_PATH="/root/wazuh_pipeline"
 
 # =====( MAIN )===== #
 setup_logging
+
+# Parse arguments
+parse_args "$@"
 
 log_message "$INFO_LVL" "Starting wazuh manager..."
 /init &
@@ -40,8 +65,15 @@ fi
 
 # Run tests
 log_message "$INFO_LVL" "Running tests..."
-if ! sh ./run_tests.sh; then
-    exit "$EXIT_ERR"
+passed=$(sh ./run_tests.sh)
+
+if [ "$INTERACTIVE_MODE" = true ]; then
+    log_message "$INFO_LVL" "Running in interactive mode"
+    /bin/sh
+else
+    if ! $passed; then
+        exit "$EXIT_ERR"
+    fi
 fi
 
 exit "$EXIT_SUCCESS"
