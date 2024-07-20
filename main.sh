@@ -71,7 +71,7 @@ if [ "$INTERACTIVE_MODE" = true ]; then
     log_message "$INFO_LVL" "Running in interactive mode"
     tail -f /dev/null
 else
-    if ! $passed; then
+    if [ "$passed" -ne 0 ]; then
         exit "$EXIT_ERR"
     fi
 fi
