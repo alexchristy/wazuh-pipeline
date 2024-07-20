@@ -15,7 +15,7 @@ RUN yum install git iproute golang -y
 RUN git clone $PIPELINE_REPO wazuh_pipeline
 RUN git clone $WAZUH_TEST_REPO wazuh_test
 
-# Install WazuhTest framework
+# Install WazuhTest tool 
 WORKDIR /root/wazuh_test
 RUN go build .
 RUN chmod 751 WazuhTest
@@ -25,7 +25,6 @@ WORKDIR /root/wazuh_pipeline
 
 RUN chmod +x ./*.sh
 
-# Expose necessary ports
 EXPOSE 1514/tcp 1515/tcp 1516/tcp 514/udp 55000/tcp
 
 ENTRYPOINT ["/bin/sh", "/root/wazuh_pipeline/main.sh", "-i"]
