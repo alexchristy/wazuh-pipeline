@@ -21,7 +21,8 @@
             "Decoder": {
                 "srcip": "10.0.0.4",
                 "srcport": "59528",
-                "srcuser": "non-existent"
+                "srcuser": "non-existent",
+                "fake-key": "This value does not exist"
             }
         }
     ]
