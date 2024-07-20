@@ -65,7 +65,8 @@ fi
 
 # Run tests
 log_message "$INFO_LVL" "Running tests..."
-passed=$(sh ./run_tests.sh)
+sh ./run_tests.sh
+passed=$?
 
 if [ "$INTERACTIVE_MODE" = true ]; then
     log_message "$INFO_LVL" "Running in interactive mode"
