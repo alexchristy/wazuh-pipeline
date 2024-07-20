@@ -19,9 +19,9 @@
             "LogFilePath": "5710-local-net.txt",
             "Predecoder": {},
             "Decoder": {
+                "srcuser": "non-existent",
                 "srcip": "10.0.0.4",
-                "srcport": "59528",
-                "srcuser": "non-existent"
+                "srcport": "59528"
             }
         }
     ]
