@@ -25,6 +25,10 @@ jobs:
       id: get_repo_url
       run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
 
+    - name: Check if repository is private
+      id: check_private
+      run: echo "is_private=${{ github.event.repository.private }}" >> $GITHUB_ENV
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
@@ -36,10 +40,17 @@ jobs:
 
     - name: Run container with branch and repo info
       run: |
-        docker run -e BRANCH_NAME=${{ steps.extract_branch.outputs.branch }} \
-                   -e REPO_URL=${{ steps.get_repo_url.outputs.repo_url }} \
-                   ${{ secrets.DOCKER_IMAGE }} || exit 1
+        if [ "${{ env.is_private }}" = "true" ]; then
+          docker run -e BRANCH_NAME=${{ steps.extract_branch.outputs.branch }} \
+                     -e REPO_URL=${{ steps.get_repo_url.outputs.repo_url }} \
+                     -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+                     ${{ secrets.DOCKER_IMAGE }} || exit 1
+        else
+          docker run -e BRANCH_NAME=${{ steps.extract_branch.outputs.branch }} \
+                     -e REPO_URL=${{ steps.get_repo_url.outputs.repo_url }} \
+                     ${{ secrets.DOCKER_IMAGE }} || exit 1
+        fi
 
     - name: Verify container exit status
-      run: |
-        echo "Container ran successfully."
+      run: echo "Container ran successfully."
+
