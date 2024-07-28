@@ -17,7 +17,9 @@
             "Format": "syslog",
             "RuleDescription": "sshd: Attempt to login using a non-existent user",
             "LogFilePath": "5710-local-net.txt",
-            "Predecoder": {},
+            "Predecoder": {
+                "program_name": "sshd"
+            },
             "Decoder": {
                 "srcip": "10.0.0.4",
                 "srcport": "59528",
