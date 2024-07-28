@@ -6,7 +6,7 @@
 
 # =====( MAIN )===== #
 
-# Check that we recieved the branch name
+# Check that we received the branch name
 if [ -n "$BRANCH_NAME" ]; then
     log_message "$INFO_LVL" "Updating branch: $BRANCH_NAME"
 else
@@ -33,6 +33,13 @@ REMOTE_REPO_URL=$(git config --get remote.origin.url)
 if [ -z "$REMOTE_REPO_URL" ]; then
     log_message "$ERR_LVL" "Failed to get the remote repository URL."
     exit "$EXIT_ERR"
+fi
+
+# Update the remote repository URL to include the TOKEN if present
+if [ -n "$TOKEN" ]; then
+    REPO_URL_WITH_TOKEN="https://${TOKEN}@${REMOTE_REPO_URL#https://}"
+    git remote set-url origin "$REPO_URL_WITH_TOKEN"
+    log_message "$INFO_LVL" "Updated remote URL to use the provided token."
 fi
 
 # Fetch the latest changes
