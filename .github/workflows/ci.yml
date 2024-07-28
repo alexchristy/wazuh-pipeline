@@ -43,7 +43,7 @@ jobs:
         if [ "${{ env.is_private }}" = "true" ]; then
           docker run -e BRANCH_NAME=${{ steps.extract_branch.outputs.branch }} \
                      -e REPO_URL=${{ steps.get_repo_url.outputs.repo_url }} \
-                     -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+                     -e TOKEN=${{ secrets.TOKEN }} \
                      ${{ secrets.DOCKER_IMAGE }} || exit 1
         else
           docker run -e BRANCH_NAME=${{ steps.extract_branch.outputs.branch }} \

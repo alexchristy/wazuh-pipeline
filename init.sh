@@ -2,8 +2,8 @@
 PIPELINE_REPO_PATH="/root/wazuh_pipeline"
 
 # Setup pipeline repo
-if [ -n "$GITHUB_TOKEN" ]; then
-  REPO_URL_WITH_TOKEN="https://${GITHUB_TOKEN}@${REPO_URL#https://}"
+if [ -n "$TOKEN" ]; then
+  REPO_URL_WITH_TOKEN="https://${TOKEN}@${REPO_URL#https://}"
   git clone "$REPO_URL_WITH_TOKEN" "$PIPELINE_REPO_PATH"
 else
   git clone "$REPO_URL" "$PIPELINE_REPO_PATH"
