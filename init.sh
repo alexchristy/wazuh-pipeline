@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Exit immediately if a command exits with a non-zero status
-set -e
-
 # Define the pipeline repository path
 PIPELINE_REPO_PATH="/root/wazuh_pipeline"
 
@@ -17,7 +14,7 @@ else
 fi
 
 # Navigate to the cloned repository directory
-cd "$PIPELINE_REPO_PATH"
+cd "$PIPELINE_REPO_PATH" || exit 1
 
 # Ensure all shell scripts are executable
 chmod +x ./*.sh
