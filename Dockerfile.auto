@@ -16,4 +16,6 @@ RUN go build .
 RUN chmod 751 WazuhTest
 RUN cp ./WazuhTest /usr/bin
 
+WORKDIR /root
+
 ENTRYPOINT ["/bin/sh", "/root/init.sh"]
