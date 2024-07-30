@@ -14,7 +14,11 @@ else
 fi
 
 # Navigate to the cloned repository directory
-cd "$PIPELINE_REPO_PATH" || exit 1
+if ! cd "$PIPELINE_REPO_PATH"; then
+  echo "Could not cd in repo directory. The repo was likely not cloned properly!"
+  echo "If this is a private repo, make sure to include a GitHub token."
+  exit 1
+fi
 
 # Ensure all shell scripts are executable
 chmod +x ./*.sh
