@@ -25,10 +25,6 @@ parse_args() {
 # ====( CONSTANTS )==== #
 PIPELINE_REPO_PATH="/root/wazuh_pipeline"
 
-# Clone intial repo
-git clone "$REPO_URL"
-cd "$PIPELINE_REPO_PATH" ||  1
-
 # ====( IMPORTS )==== #
 # shellcheck disable=SC1091
 . "$PIPELINE_REPO_PATH/utils.sh"

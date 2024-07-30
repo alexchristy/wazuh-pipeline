@@ -5,6 +5,7 @@
 . "$PIPELINE_REPO_PATH/utils.sh"
 
 # =====( MAIN )===== #
+cd "$PIPELINE_REPO_PATH" ||  1
 
 # Check that we received the branch name
 if [ -n "$BRANCH_NAME" ]; then
