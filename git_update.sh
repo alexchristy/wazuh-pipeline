@@ -5,7 +5,7 @@
 . "$PIPELINE_REPO_PATH/utils.sh"
 
 # =====( MAIN )===== #
-cd "$PIPELINE_REPO_PATH" ||  1
+run_command "cd $PIPELINE_REPO_PATH" "Failed to change to directory: $PIPELINE_REPO_PATH"
 
 # Check that we received the branch name
 if [ -n "$BRANCH_NAME" ]; then
@@ -29,22 +29,12 @@ if [ ! -d ".git" ]; then
     exit "$EXIT_ERR"
 fi
 
-# Get the remote repository URL
-REMOTE_REPO_URL=$(git config --get remote.origin.url)
-if [ -z "$REMOTE_REPO_URL" ]; then
-    log_message "$ERR_LVL" "Failed to get the remote repository URL."
-    exit "$EXIT_ERR"
-fi
-
 # Update the remote repository URL to include the TOKEN if present
 if [ -n "$TOKEN" ]; then
-    REPO_URL_WITH_TOKEN="https://${TOKEN}@${REMOTE_REPO_URL#https://}"
+    REPO_URL_WITH_TOKEN="https://${TOKEN}@${REPO_URL#https://}"
     git remote set-url origin "$REPO_URL_WITH_TOKEN"
     log_message "$INFO_LVL" "Updated remote URL to use the provided token."
 fi
-
-# Fetch the latest changes
-run_command "git pull" "Failed to pull updates from remote: $REMOTE_REPO_URL"
 
 # Checkout the branch
 run_command "git checkout $BRANCH_NAME" "Failed to checkout branch: $BRANCH_NAME"
@@ -55,7 +45,7 @@ STATUS=$?
 
 # Check if git pull failed
 if [ $STATUS -ne 0 ]; then
-    log_message "$ERR_LVL" "Git pull failed for branch: $BRANCH_NAME, remote: $REMOTE_REPO_URL"
+    log_message "$ERR_LVL" "Git pull failed for branch: $BRANCH_NAME, remote: $(git config --get remote.origin.url)"
     exit "$EXIT_ERR"
 fi
 
