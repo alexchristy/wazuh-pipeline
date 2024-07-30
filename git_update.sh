@@ -43,7 +43,7 @@ if [ -n "$TOKEN" ]; then
 fi
 
 # Fetch the latest changes
-run_command "git fetch" "Failed to fetch from remote: $REMOTE_REPO_URL"
+run_command "git pull" "Failed to pull updates from remote: $REMOTE_REPO_URL"
 
 # Checkout the branch
 run_command "git checkout $BRANCH_NAME" "Failed to checkout branch: $BRANCH_NAME"
