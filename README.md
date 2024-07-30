@@ -36,10 +36,10 @@
 ## Quickstart (Public)
 
 1. Fork this repository and only copy the main branch
-
-![Fork repo button](https://github.com/user-attachments/assets/f6e3dbbc-e7f3-4d79-9d38-3e82511d3bb0)
-
-![Fork main branch only](https://github.com/user-attachments/assets/90a0ceae-fb0e-42b2-b22c-0d9c836cc724)
+    
+    ![Fork repo button](https://github.com/user-attachments/assets/f6e3dbbc-e7f3-4d79-9d38-3e82511d3bb0)
+    
+    ![Fork main branch only](https://github.com/user-attachments/assets/90a0ceae-fb0e-42b2-b22c-0d9c836cc724)
 
 2. Configure the three following Action secrets:
 
@@ -47,15 +47,15 @@
     * `DOCKER_USERNAME` - Username for the docker account pulling the docker image. Ex: `user@example.com`
     * `DOCKER_PASSWORD` - Password for the docker account pulling the docker image.
 
-![Visual secret setup](https://github.com/user-attachments/assets/535f8523-6b15-42f8-9adb-57b830a772ec)
+    ![Visual secret setup](https://github.com/user-attachments/assets/535f8523-6b15-42f8-9adb-57b830a772ec)
 
 3. Enable GitHub Actions
 
-![Enable GitHub Actions steps](https://github.com/user-attachments/assets/b89fba97-9aad-40cb-9560-437ad26aaa91)
+    ![Enable GitHub Actions steps](https://github.com/user-attachments/assets/b89fba97-9aad-40cb-9560-437ad26aaa91)
 
 4. Done!
 
-You can now start creating pull requests or committing directly to main and see the tests run automatically. However, due to the nature of forked repositories, you repository will always be public. If this is an issue, follow the steps for a private repoistory setup.
+    You can now start creating pull requests or committing directly to main and see the tests run automatically. However, due to the nature of forked repositories, you repository will always be public. If this is an issue, follow the steps for a private repoistory setup.
 
 ## Private Setup
 
