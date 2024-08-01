@@ -11,10 +11,9 @@
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#what-are-the-tests">What are the tests?</a> •
-  <a href="#organizing-tests">Organizing Tests</a> •
-  <a href="#test-syntax">Test Syntax</a> •
+  <a href="#quickstart-public">Quickstart</a> •
+  <a href="#private-setup">Private Setup</a> •
+  <a href="#decoder-resolution">Decoder Resolution</a> •
   <a href="#related">Related</a> •
   <a href="#license">License</a>
 </p>
@@ -32,6 +31,9 @@
 * Catch Errors Early
 
 * Prevent Regression
+
+* Decoder Confligt Resolution
+  - Automatically disables default decoders that overlap with custom decoders.
 
 ## Quickstart (Public)
 
@@ -107,6 +109,45 @@
     Pushing the main branch will kick off the CI pipeline which should run the default tests. If it passes then the repository is ready for use. If it fails then the repository is not functional and an issue should be filed with the GitHub Action log.
 
     >**Note:** If this step is failing ensure that the account you are using has proper access to the new repository.
+
+## Decoder Resolution
+
+If a custom decoder name overlaps with an default Wazuh decoder's name, the Wazuh manager will fail to startup. To address this, this pipeline will automatically disable default decoder names that overlap/conflict with custom decoders names.
+
+This can be useful, but it can also break detection logic as the pipeline will exclude entire default decoder files when any conflict with a custom decoder file is detected.
+
+**Example:**
+
+You add the custom [auditd](https://www.redhat.com/sysadmin/configure-linux-auditing-auditd) decoder below to the `decoders/` folder in this pipeline.
+
+`custom_auditd_decoder.xml` contents:
+
+```xml
+<decoder name="auditd">
+  <prematch>My Special Custom Pattern</prematch>
+</decoder>
+```
+
+The pipeline scripts will find an overlapping default decoder `0040-auditd_decoders.xml` and disable the entire file. This is because both files contain a decoder with the name `auditd`. As a result of being in the same file, the decoder `auditd-syscall` will also be disabled.
+
+`0040-auditd_decoders.xml` contents:
+
+```xml
+<html><body><decoder name="auditd">
+  <prematch>^type=</prematch>
+</decoder>
+
+<decoder name="auditd-syscall">
+  <parent>auditd</parent>
+  <prematch offset="after_parent">^SYSCALL </prematch>
+  <regex offset="after_parent">^(SYSCALL) msg=audit\(\d\d\d\d\d\d\d\d\d\d.\d\d\d:(\d+)\): </regex>
+  <order>audit.type,audit.id</order>
+</decoder>
+
+(...)
+```
+
+Because of this behavior, it is recommended that when you are modifying default decoders copy the entire original decoder file and make the modifications inside of the copy.
 
 ## Related
 
