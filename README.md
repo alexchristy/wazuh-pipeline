@@ -18,6 +18,14 @@
     <li><a href="#key-features">Key Features</a></li>
     <li><a href="#quickstart-public">Quickstart</a></li>
     <li><a href="#private-setup">Private Setup</a></li>
+    <li>
+      <a href="#pipeline-organization">Pipeline Organization</a>
+      <ul>
+        <li><a href="#decoders-folder">Decoders folder</a></li>
+        <li><a href="#rules-folder">Rules folder</a></li>
+        <li><a href="#tests-folder">Tests folder</a></li>
+      </ul>
+    </li>
     <li><a href="#decoder-resolution">Decoder Resolution</a></li>
     <li><a href="#building-containers">Building Containers</a></li>
     <li><a href="#running-locally">Running Locally</a></li>
@@ -119,6 +127,26 @@
 7. Finished!
 
     Pushing the main branch will kick off the CI pipeline which should run the default tests. If it passes then the repository is ready for use. If it fails then the repository is not functional and an issue should be filed with the GitHub Action log.
+
+## Pipeline Organization
+
+The pipeline repository has three main folders: `decoders`, `rules`, and `tests`. The `.sh` scripts in the root of repository should **not** be modified unless explicitly trying to change the behavior of the pipeline.
+
+### Decoders folder
+
+Located at `decoders/`, this folder is where you should put all the custom decoder files (`.xml`) that will get automatically installed when the container is run. 
+
+> **Note:** If there is a decoder name in this folder that conflicts/overlaps with a default Wazuh decoder, the default decoder file will be disabled. (See the [Decoder Resolution](#decoder-resolution) section for more information.)
+
+### Rules folder
+
+Located at `rules/`, this folder is where you should put all custom rule files (`.xml`) that will get automatically installed when the container is run.
+
+### Tests folder
+
+Located at `tests/`, this folder is where you should put all of your [WazuhTest](https://github.com/alexchristy/WazuhTest) files (`.json`) and associated raw log files. See the [WazuhTest repository](https://github.com/alexchristy/WazuhTest) for information on test syntax and organization.
+
+> **Note:** If a rule's ID conflicts with an existing/default rule only the first rule definition will be used.
 
 ## Decoder Resolution
 
