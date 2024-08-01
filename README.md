@@ -9,11 +9,16 @@
 
 <h4 align="center">A CI pipeline built for <a href="https://wazuh.com" target="_blank">Wazuh</a>.</h4>
 
+<h4 align="center">Link to <a href="https://github.com/alexchristy/wazuh-pipeline" target="_blank">original repository</a>.</h4>
+
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#quickstart-public">Quickstart</a> •
   <a href="#private-setup">Private Setup</a> •
   <a href="#decoder-resolution">Decoder Resolution</a> •
+  <a href="#building-containers">Building Containers</a> •
+  <a href="#running-locally">Running Locally</a> •
+  <a href="#debugging">Debugging</a> •
   <a href="#related">Related</a> •
   <a href="#license">License</a>
 </p>
@@ -103,12 +108,12 @@
     ```bash
     git push private main
     ```
+    
+    >**Note:** If this step is failing ensure that the account you are using has proper access to the new repository.
 
 7. Finished!
 
     Pushing the main branch will kick off the CI pipeline which should run the default tests. If it passes then the repository is ready for use. If it fails then the repository is not functional and an issue should be filed with the GitHub Action log.
-
-    >**Note:** If this step is failing ensure that the account you are using has proper access to the new repository.
 
 ## Decoder Resolution
 
@@ -148,6 +153,75 @@ The pipeline scripts will find an overlapping default decoder `0040-auditd_decod
 ```
 
 Because of this behavior, it is recommended that when you are modifying default decoders copy the entire original decoder file and make the modifications inside of the copy.
+
+## Building Containers
+
+> *This project maintains a public docker image for ease of use [here](https://hub.docker.com/r/alexchristy/wazuh-test-pipeline).*
+
+If you wish to build your own docker images for the pipeline you can build them using the two Dockerfiles.
+
+**Dockerfiles:**
+  - `Dockerfile.auto` - This is the image **used for the pipeline** or other automations.
+  - `Dockerfile.live` - This is an interactive image that will run indefinitely after running the pipeline logic. 
+    - Mainly used for [debugging](#debugging) or local testing.
+
+**Build image:**
+
+```bash
+docker build --no-cache -f Dockerfile.{auto or live} -t local-wazuh-pipeline-image .
+```
+
+
+For the pipeline to work correctly in GitHub you will need to upload your docker image to [Docker Hub](https://hub.docker.com/) and then set the value of the `DOCKER_IMAGE` GitHub Action secret to your new image name.
+
+**Example Image Name:**
+
+Docker Hub image link: `https://hub.docker.com/r/alexchristy/wazuh-test-pipeline`
+
+DOCKER_IMAGE secret value: `alexchristy/wazuh-test-pipeline`
+
+## Running Locally
+
+1. Clone the repository.
+
+    ```bash
+    git clone https://github.com/alexchristy/wazuh-pipeline
+    ```
+
+2. Enter repository directory.
+
+    ```bash
+    cd wazuh-pipeline
+    ```
+
+3. Build docker image.
+
+    ```bash
+    docker build --no-cache -f Dockerfile.{auto or live} -t local-wazuh-pipeline-image .
+    ```
+
+    > Choose the `.live` image if you are trying to debug the container.
+
+4. Run docker container.
+
+    ```bash
+    docker run -d --name wazuh-pipeline-container \
+    -e REPO_URL={URL_TO_YOUR_REPO} \
+    -e BRANCH_NAME=main \
+    -e TOKEN={GITHUB_TOKEN_IF_REPO_PRIVATE} \
+    local-wazuh-pipeline-image
+    ```
+
+## Debugging
+
+The pipeline scripts generate three logs during runtime inside of the `/root/wazuh_pipeline/` directory.
+
+**Logs:**
+  - `wazuh_pipeline_script.log` - Human friendly and easily readable log.
+  - `wazuh_pipeline_shell.log` - Debug shell logging with done with `set -x`.
+  - `wazuh_pipeline_wazuh_test.log` - [WazuhTest](https://github.com/alexchristy/wazuh-pipeline) tool log.
+
+The easiest way to debug the container is to build the interactive image (`Dockerfile.live`) and [run the image locally](#running-locally). The interactive image will execute the pipeline scripts initially and then you can connect and inspect the logs.
 
 ## Related
 
