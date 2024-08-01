@@ -11,17 +11,22 @@
 
 <h4 align="center">Link to <a href="https://github.com/alexchristy/wazuh-pipeline" target="_blank">original repository</a>.</h4>
 
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#quickstart-public">Quickstart</a> •
-  <a href="#private-setup">Private Setup</a> •
-  <a href="#decoder-resolution">Decoder Resolution</a> •
-  <a href="#building-containers">Building Containers</a> •
-  <a href="#running-locally">Running Locally</a> •
-  <a href="#debugging">Debugging</a> •
-  <a href="#related">Related</a> •
-  <a href="#license">License</a>
-</p>
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#key-features">Key Features</a></li>
+    <li><a href="#quickstart-public">Quickstart</a></li>
+    <li><a href="#private-setup">Private Setup</a></li>
+    <li><a href="#decoder-resolution">Decoder Resolution</a></li>
+    <li><a href="#building-containers">Building Containers</a></li>
+    <li><a href="#running-locally">Running Locally</a></li>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#related">Related</a></li>
+    <li><a href="#license">License</a></li>
+  </ol>
+</details>
+
 
 ## Key Features
 
