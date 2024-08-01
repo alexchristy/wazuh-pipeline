@@ -50,7 +50,7 @@
 
 * Prevent Regression
 
-* Decoder Confligt Resolution
+* Decoder Conflict Resolution
   - Automatically disables default decoders that overlap with custom decoders.
 
 ## Quickstart (Public)
