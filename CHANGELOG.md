@@ -1,3 +1,15 @@
+# v0.1.0 (Sat Oct 05 2024)
+
+#### 🚀 Enhancement
+
+- Only create releases when tests pass on main branch [#10](https://github.com/alexchristy/wazuh-pipeline/pull/10) ([@alexchristy](https://github.com/alexchristy))
+
+#### Authors: 1
+
+- Alex Christy ([@alexchristy](https://github.com/alexchristy))
+
+---
+
 # v0.0.1 (Sat Oct 05 2024)
 
 #### 🐛 Bug Fix
