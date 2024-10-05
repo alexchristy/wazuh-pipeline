@@ -120,7 +120,7 @@ Located at `tests/`, this folder is where you should put all of your [WazuhTest]
 
 ## Decoder Resolution
 
-If a custom decoder name overlaps with an default Wazuh decoder's name, the Wazuh manager will fail to startup. To address this, this pipeline will automatically disable default decoder names that overlap/conflict with custom decoders names.
+If a custom decoder name overlaps with a default Wazuh decoder's name, the Wazuh manager will fail to startup. To address this, this pipeline will automatically disable default decoder names that overlap/conflict with custom decoders names.
 
 This can be useful, but it can also break detection logic as the pipeline will exclude entire default decoder files when any conflict with a custom decoder file is detected.
 
@@ -174,14 +174,13 @@ If you wish to build your own docker images for the pipeline you can build them 
 docker build --no-cache -f Dockerfile.{auto or live} -t local-wazuh-pipeline-image .
 ```
 
-
 For the pipeline to work correctly in GitHub you will need to upload your docker image to [Docker Hub](https://hub.docker.com/) and then set the value of the `DOCKER_IMAGE` GitHub Action secret to your new image name.
 
 **Example Image Name:**
 
 Docker Hub image link: `https://hub.docker.com/r/alexchristy/wazuh-test-pipeline`
 
-DOCKER_IMAGE secret value: `alexchristy/wazuh-test-pipeline`
+`DOCKER_IMAGE` secret value: `alexchristy/wazuh-test-pipeline`
 
 ## Running Locally
 
@@ -203,7 +202,7 @@ DOCKER_IMAGE secret value: `alexchristy/wazuh-test-pipeline`
     docker build --no-cache -f Dockerfile.{auto or live} -t local-wazuh-pipeline-image .
     ```
 
-    > Choose the `.live` image if you are trying to debug the container.
+    > Choose the `.live` image if you are trying to debug the container or interact with the configured Wazuh manager.
 
 4. Run docker container.
 
