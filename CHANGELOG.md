@@ -1,3 +1,15 @@
+# v0.1.3 (Sat Oct 05 2024)
+
+#### ⚠️ Pushed to `main`
+
+- Add release config section to README ([@alexchristy](https://github.com/alexchristy))
+
+#### Authors: 1
+
+- Alex Christy ([@alexchristy](https://github.com/alexchristy))
+
+---
+
 # v0.1.2 (Sat Oct 05 2024)
 
 #### ⚠️ Pushed to `main`
