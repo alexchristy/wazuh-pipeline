@@ -30,6 +30,7 @@
     <li><a href="#building-containers">Building Containers</a></li>
     <li><a href="#running-locally">Running Locally</a></li>
     <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
     <li><a href="#related">Related</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -255,6 +256,81 @@ The pipeline scripts generate three logs during runtime inside of the `/root/waz
   - `wazuh_pipeline_wazuh_test.log` - [WazuhTest](https://github.com/alexchristy/wazuh-pipeline) tool log.
 
 The easiest way to debug the container is to build the interactive image (`Dockerfile.live`) and [run the image locally](#running-locally). The interactive image will execute the pipeline scripts initially and then you can connect and inspect the logs.
+
+## Troubleshooting
+
+### Push Repository not Found
+
+When creating a copy of this pipeline in your own private repository you might run into an error like the one below when trying to push the files to your newly created repo:
+
+```bash
+me@hostname:/tmp/wazuh-pipeline.git$ git push private main
+remote: Repository not found.
+fatal: repository 'https://github.com/myusername/wazuh-pipeline/' not found
+```
+
+**Fix Steps:**
+
+1. Create a new SSH key for authenticating to GitHub (or use an exiting one).
+
+2. Add the SSH key to your GitHub account ([GitHub Documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)).
+
+3. Add the SSH key to your SSH client. On Ubuntu:
+
+    ```bash
+    ssh-add /path/to/ssh_key
+    ```
+
+4. Add configuration for the new SSH key. On Ubuntu, edit or create `~/.ssh/config`:
+
+    ```txt
+    Host github.com
+      HostName github.com
+      User git
+      IdentityFile /path/to/ssh_key
+    ```
+
+5. Change to the remote URL for the repo clone:
+
+    ```bash
+    git remote remove private
+    git remote add git@github.com:$MY_USERNAME/$REPO_NAME.git
+    git push private main
+    ```
+
+### Pipeline Could not Read Username
+
+This error causes the pipeline step named `Run container with branch and repo info` to fail on the first run. Usually this happens after pushing the copied files to your **private** repository. The error in the pipeline log will say something like:
+
+```txt
+Cloning repository without token
+Cloning into '/root/wazuh_pipeline'...
+fatal: could not read Username for 'https://github.com': No such device or address
+Could not cd in repo directory. The repo was likely not cloned properly!
+If this is a private repo, make sure to include a GitHub token.
+/root/init.sh: line 17: cd: /root/wazuh_pipeline: No such file or directory
+Error: Process completed with exit code 1.
+```
+
+This happens because the pipeline does not have the `TOKEN` secret configured, so it assumes that your Wazuh pipeline repository that you created is public.
+
+**Fix Steps:**
+
+1. Create a fine-grained GitHub token for accessing this repository following **Step 2** in the [Private Setup](#private-setup) section. Save this value for the next step.
+
+2. Navigate to `Settings > Secrets and variables > Actions`.
+
+3. Create a new repository secret called `TOKEN` with the value of the GitHub fine-grained token you created earlier.
+
+4. Navigate to `Actions` and click the failed workflow run. (Usually there is only one run)
+
+5. In the top right, click `Re-run jobs`, then click `Re-run all jobs`
+
+6. On the pop up click the green button `Re-run job`
+
+7. The pipeline should completed successfully.
+
+*If this did not work, look at other sections in the [Troubleshooting](#troubleshooting) section for other solutions.*
 
 ## Related
 
