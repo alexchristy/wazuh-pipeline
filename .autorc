@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "git-tag",
+    "first-time-contributor",
+    "released"
+  ],
+  "owner": "alexchristy",
+  "repo": "wazuh-pipeline",
+  "name": "Alex Christy",
+  "email": "a.christy@ufl.edu"
+}

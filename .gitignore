@@ -1,2 +1,4 @@
+.env
+
 # Generated log files
 *.log
