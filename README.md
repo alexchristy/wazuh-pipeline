@@ -17,6 +17,7 @@
   <ol>
     <li><a href="#key-features">Key Features</a></li>
     <li><a href="#quickstart">Quickstart</a></li>
+    <li><a href="#release-configuration">Release Configuration</a></li>
     <li>
       <a href="#pipeline-organization">Pipeline Organization</a>
       <ul>
@@ -88,15 +89,99 @@
 
 7. **[Private Repos Only]** Configure an additional secret called `TOKEN` with the value of the token created in the previous step.
 
-8. Navigate to `Actions` and click the failed workflow run. (Usually there is only one called `Initial commit`)
+8. This pipeline is configured to use [auto](https://intuit.github.io/auto/) to create releases automatically. 
+    * ✅ **Keep it:** Jump to the [Release Configuration](#release-configuration) section to set it up and return to this step when finished.
 
-9. In the top right, click `Re-run jobs`, then click `Re-run all jobs`
+    * ❌ **Remove it:** Delete two files: `.autorc` and `.github/workflows/release.yml`. Commit changes. Continue to the next step.
 
-10. On the pop up click the green button `Re-run jobs`
+9. Navigate to `Actions`
 
-11. The pipeline should completed successfully.
+10. Click the correct workflow run:
+    * If you **configured** auto release, click the `Update auto configuration` workflow.
+    * If you **removed** auto release, click the `Initial commit` workflow. (Should be the only workflow run available)
 
+11. In the top right, click `Re-run jobs`, then click `Re-run all jobs`
 
+12. On the pop up click the green button `Re-run jobs`
+
+13. The pipeline should completed successfully.
+    * *If auto release was configured, there should be a new release, v0.0.1, on the repo homepage in GitHub*
+
+## Release Configuration
+
+This section details how to setup and configure automatic releases for your repository.
+
+1. Clone your pipeline repository. 
+    * *It should have files in it from when we created the template.*
+
+2. Download the appropriate `auto` binary from the [Auto Releases](https://github.com/intuit/auto/releases) page.
+
+3. Unzip the auto binary. On Ubuntu:
+
+    ```bash
+    gunzip auto-linux.gz
+    ```
+
+4. Make the auto binary executable. On Ubuntu:
+
+    ```bash
+    chmod +x ./auto-linux
+    ```
+
+5. Move the executable into the cloned repo and enter the directory. On Ubuntu:
+
+    ```bash
+    mv ./auto-linux ./wazuh-pipeline/
+    cd ./wazuh-pipeline/
+    ```
+
+6. Initialize auto. On Ubuntu:
+
+    ```bash
+    ./auto-linux init
+    ```
+
+7. Options to select:
+
+    * Package Manager Plugin --> `Git Tag`
+    * Plugins --> Optionally: `First Time Contributor` and `Released`
+    * GitHub Project --> Fill in your repository details here.
+    * Git User --> Generally, put the username and email of account that owns the pipeline repo.
+    * Release only on PR --> `false`
+    * Enterprise GitHub --> Generally set to `false`.
+    * Create .env file --> `true`
+        * This should be a GitHub personal access token of type `Tokens (classic)` with all `repo` permissions.
+    * Customize default labels --> `false`
+    * Add more labels --> `false`
+    
+    *You may see an error at the end. This is expected.*
+
+8. Create version labels. On Ubuntu:
+
+    ```bash
+    ./auto-linux create-labels
+    ```
+
+9. Delete auto binary. On Ubuntu:
+
+    ```bash
+    rm ./auto-linux
+    ```
+
+10. Commit `.autorc` changes. On Ubuntu:
+
+    ```bash
+    git add ./.autorc
+    git commit -m "Update auto configuration"
+    git push origin main
+    ```
+
+11. Back on the repo's page on GitHub, navigate to `Settings > Actions > General`. 
+    * Find the section called `Workflow permissions`
+    * Select `Read and write permissions`
+    * Click `Save`
+
+12. The auto release is now configured. Continue with **step 9** in the [Quickstart](#quickstart) section.
 
 ## Pipeline Organization
 
