@@ -1,15 +1,15 @@
 name: Create Release
 
 on:
-  push:
-    branches:
-      - main
-
+  workflow_run:
+    workflows: ["Wazuh Decoder & Rule CI Pipeline"]
+    types:
+      - completed
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && !contains(github.event.workflow_run.head_commit.message, 'ci skip') && !contains(github.event.workflow_run.head_commit.message, 'skip ci') }}  # Ensure it runs only on success and if commit message doesn't skip CI
     steps:
       - uses: actions/checkout@v4
 
