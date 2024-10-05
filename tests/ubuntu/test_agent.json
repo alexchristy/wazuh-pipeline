@@ -5,7 +5,7 @@
             "RuleID": "203",
             "RuleLevel": "9",
             "format": "syslog",
-            "RuleDescription": "Agent event queue is ful. Events may be lost.",
+            "RuleDescription": "Agent event queue is full. Events may be lost.",
             "LogFilePath": "203.txt",
             "Predecoder": {},
             "Decoder": {} 
