@@ -1,3 +1,15 @@
+# v0.1.2 (Sat Oct 05 2024)
+
+#### ⚠️ Pushed to `main`
+
+- Add PR template ([@alexchristy](https://github.com/alexchristy))
+
+#### Authors: 1
+
+- Alex Christy ([@alexchristy](https://github.com/alexchristy))
+
+---
+
 # v0.1.1 (Sat Oct 05 2024)
 
 #### ⚠️ Pushed to `main`
